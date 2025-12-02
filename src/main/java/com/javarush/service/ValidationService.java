@@ -2,9 +2,12 @@ package com.javarush.service;
 
 import com.javarush.exception.CaesarException;
 
+import java.io.BufferedInputStream;
+
 public class ValidationService {
 
-    public void validateTextForEncoding (String text) throws CaesarException {
+    //public void validateTextForEncoding (String text) throws CaesarException {
+      public void validateTextForEncoding(BufferedInputStream bis) throws CaesarException {
         // Валидация текста для кодирования
         // 1 проверить на null и пустоту
         // 2 пройти по всем символам

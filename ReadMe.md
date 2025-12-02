@@ -17,3 +17,12 @@ caesar
         CaesarException
         [CaesarException.java](src/main/java/com/javarush/exception/CaesarException.java)
         FilleProcessingException
+
+
+Примеры текстов на диске 
+        какие-то пленники адрес:
+C:\\exaplesText\\ehrbat_plenniki_dorog.u.txt
+        потный Гарри
+C:\\exaplesText\\Rouling_Garri-Potter-perevod-Marii-Spivak-_3_Garri-Potter-i-uznik-Azkabana_RuLit_Me.txt
+
+    

@@ -1,8 +1,6 @@
 package com.javarush;
-
-
 import com.javarush.exception.CaesarException;
-
+import com.javarush.service.FileService;
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -10,40 +8,39 @@ import java.util.Scanner;
 
 public class CaesarApp {
 
-    //  поля класса - зависимости
-
     Scanner scanner;
+    FileService fileService = new FileService();//  поля класса - зависимости
+
+    public CaesarApp() {}   // конструктор - инициализация зависимостей
 
 
-    // конструктор - инициализация зависимостей
-
-    public CaesarApp() {
-
-        scanner = new Scanner(System.in);
-    }
-
-    public static void main() {
+    static void main() {
         //создать экземпляр приложения и запустить
         CaesarApp  app = new CaesarApp();
         app.run();
+
     }
 
     public void run(){
         // реализовать главный цикл приложения
-        final String EXIT = "EXIT";
-
-
-
         printWelcomeMessage(); //1. Вывести приложение
-        showMainMenu();
-        startMusic();
-        while (scanner.hasNextLine()){ //2. Меню (бесконечный цикл)
+        //startMusic();
+        int inputInt = 0;
+
+        while (true){ //2. Меню (бесконечный цикл)
+            showMainMenu();
+            scanner = new Scanner(System.in);
+
+            System.out.println("Сделайте выбор: ");
+
             String input = scanner.nextLine();
 
-            if (input.equalsIgnoreCase(EXIT)){break;} //4. выход по команде
+            if (input.equalsIgnoreCase("EXIT")){break;} //4. выход по команде
 
-            int inputInt = 0;
-
+            if (input.equalsIgnoreCase("HELP")) {
+                showCaesarInfo();
+                continue;
+            }
             try {
                 inputInt = Integer.parseInt(input);
 
@@ -51,19 +48,49 @@ public class CaesarApp {
                 new CaesarException("Не правильный ввод!!!");
             }
 
-            switch (inputInt) {        //3. Обработка выбора пользователя
-                case 1:
-                break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                    break;
-                default:
-                    System.out.println("От I до IV");
-            }
 
+            if (inputInt == 1 || inputInt == 2){
+                System.out.println(inputInt == 1 ? "ШИФРОВАНЕ" : "ДЕШИФРОВКА");
+
+                getInputFilePath();
+
+                String source = scanner.nextLine();
+
+                getOutputFilePath();
+
+                String target = scanner.nextLine();
+
+                System.out.println("Укажите сдвиг");
+
+                int step = scanner.nextInt();
+
+
+
+                if (inputInt == 1) {
+
+                    processEncodeFile(source, target, step);
+
+                } else {
+
+                    processDecodeFile(source,target, step);
+                }
+
+
+            }else if (inputInt == 3) {
+
+                //getInputFilePath();
+                //getOutputFilePath();
+
+                System.out.println("В разработке");
+            } else if (inputInt == 4) {
+
+                //getInputFilePath();
+                //getOutputFilePath();
+
+                System.out.println("В разработке");
+            } else {
+                System.out.println("От I до IV");
+            }
         }
 
     }
@@ -83,59 +110,87 @@ public class CaesarApp {
 
     private void showMainMenu(){
         //отобразить меню с вариантами действий
+        String stars = "*******************";
         String firstMessage = "Идущие на смерть приветствуют тебя \nвыберите пункт меню:";
         String positionOne =   "I.  Закодировать послание";
         String positionTwo =   "II. Раскодировать послание";
         String positionThree = "III. Взлом послание перебором";
         String positionFour =  "IV. Взлом статическим анализом";
         String positionExit =  "Для выхода нажмите EXIT";
+        String positionHelp =  "Для справки введите HELP";
         System.out.println(firstMessage);
         System.out.println(positionOne);
         System.out.println(positionTwo);
         System.out.println(positionThree);
         System.out.println(positionFour);
         System.out.println(positionExit);
+        System.out.println(positionHelp);
         }
 
-    private void processEncodeFile(){
+    private void processEncodeFile(String source, String destination, int step) {
         // обработка кодирования файла
-        //1. получить пути файлов
-        //2. прочитать исходный файл
-        //3. закодировать текст
-        //4. записать результат
-        //5. Дать обратную связь
+
+        if (!fileService.isFilesExists(source)) displayErrorResult();
+
+//        try {
+//            fileService.readFile(source); //2. прочитать исходный файл
+//        } catch (CaesarException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        //3. закодировать текст
+//
+//        try {
+//            fileService.writeFile(destination,""); //4. записать результат
+//        } catch (CaesarException e) {
+//            throw new RuntimeException(e);
+//        }
+
+        displaySuccessResult(); //5. Дать обратную связь
 
     }
 
-    private void processDecodeFile(){
+    private void processDecodeFile(String source, String destination, int step){
         // обработка декодирования файла
-        // 1 получить пути
-        // 2 прочитать файл
-        // 3 декодировать цезаря
-        // 4 показать успешное завершение
+        if (!fileService.isFilesExists(source)) displayErrorResult();
+
+//        try {
+//            fileService.readFile(source); // 2 прочитать файл
+//        } catch (CaesarException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        // 3 декодировать цезаря
+//
+//        try {
+//            fileService.writeFile(destination,"");
+//        } catch (CaesarException e) {
+//            throw new RuntimeException(e);
+//        }
+
+        displaySuccessResult(); // 4 показать успешное завершение
+
     }
 
-    private String getInputFilePath(){
-        // запрос пути к исходному файлу
-        return null;
+    private void getInputFilePath(){
+        System.out.println("Укажите путь файла для чтения");// запрос пути к исходному файлу
     }
 
-    private String getOutputFilePath(){
-        // запрос пути для записи результата
-        return null;
+    private void getOutputFilePath(){
+        System.out.println("Укажите путь файла для записи"); // запрос пути для записи результата
+
     }
 
-    private void displaySuccessResault() {
+    private void displaySuccessResult() {
         // красивый вывод успешного результата
     }
 
-    private void displayErrorResault(String message) {
-        // ввывод сообщения об ошибке
+    private void displayErrorResult() {
+        System.out.println("Проверьте путь файла и попробуйте еще раз"); // вывод сообщения об ошибке
     }
 
-    private void showAlphaberInfo () {
-
-        // вывод справки по алфавиту Морзе
+    private void showCaesarInfo () {
+        System.out.println("Какая то справка");
     }
 
     private void startMusic () {
@@ -148,11 +203,11 @@ public class CaesarApp {
                     AudioInputStream ais = AudioSystem.getAudioInputStream(sound.toFile());
 
                     //Получаем реализацию интерфейса Clip
-                    //Может выкинуть LineUnavailableException
+                    // может выкинуть LineUnavailableException
                     Clip clip = AudioSystem.getClip();
 
                     //Загружаем наш звуковой поток в Clip
-                    //Может выкинуть IOException и LineUnavailableException
+                    // может выкинуть IOException и LineUnavailableException
                     clip.open(ais);
 
                     clip.setFramePosition(0); //устанавливаем указатель на старт
@@ -160,7 +215,7 @@ public class CaesarApp {
 
                     //Если не запущено других потоков, то стоит подождать, пока клип не закончится
                     //В GUI-приложениях следующие 3 строчки не понадобятся
-                    Thread.sleep(clip.getMicrosecondLength()/1000);
+                   Thread.sleep(clip.getMicrosecondLength()/1000);
                     // clip.stop(); //Останавливаем
                     clip.close(); //Закрываем
                 } catch (IOException | UnsupportedAudioFileException | LineUnavailableException exc ) {
