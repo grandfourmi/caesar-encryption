@@ -28,11 +28,7 @@ public class StartMusic {
             Thread.sleep(clip.getMicrosecondLength()/1000);
             // clip.stop(); //Останавливаем
             clip.close(); //Закрываем
-        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException exc) {
+        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException exc ) {
             exc.printStackTrace();
-        } catch (InterruptedException _) {
-
-        } finally {
-
-        }
+        } catch (InterruptedException _) {}
 }}
