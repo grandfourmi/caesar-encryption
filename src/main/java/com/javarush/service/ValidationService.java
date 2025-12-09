@@ -2,15 +2,18 @@ package com.javarush.service;
 
 import com.javarush.exception.CaesarException;
 
-import java.io.BufferedInputStream;
+ //   ОЗНАКОМИТЬСЯ С ТЗ И УБЕДИТЬСЯ В НЕОБХОДИМОСТИ ЭТОГО КЛАССА
 
-public class ValidationService {
+    public class ValidationService {
 
     //public void validateTextForEncoding (String text) throws CaesarException {
-      public void validateTextForEncoding(BufferedInputStream bis) throws CaesarException {
-        // Валидация текста для кодирования
+      public void validateTextForEncoding(String text) throws CaesarException {
+        // todo Валидация текста для кодирования
         // 1 проверить на null и пустоту
-        // 2 пройти по всем символам
+        if(text == null || text.trim().isEmpty()){
+            throw new CaesarException("Null or empty text");
+        }
+          // 2 пройти по всем символам
         // 3 проверить наличие в алфавите
         // 4 выбросить исключение с инфо о позиции ошибки
     }

@@ -1,5 +1,7 @@
 package com.javarush;
+import com.javarush.core.CaesarCoder;
 import com.javarush.exception.CaesarException;
+import com.javarush.model.ProcessingResult;
 import com.javarush.service.FileService;
 import javax.sound.sampled.*;
 import java.io.IOException;
@@ -8,13 +10,20 @@ import java.util.Scanner;
 
 public class CaesarApp {
 
-    Scanner scanner;
-    FileService fileService = new FileService();//  поля класса - зависимости
+    private final Scanner scanner;
+    private final FileService fileService ; //  поля класса - зависимости
+    private final CaesarCoder caesarCoder;
 
-    public CaesarApp() {}   // конструктор - инициализация зависимостей
+    public CaesarApp() {
+        this.scanner = new Scanner(System.in);
+        this.fileService = new FileService();
+        this.caesarCoder = new CaesarCoder();
+    }
+
+    // конструктор - инициализация зависимостей
 
 
-    static void main() {
+     static void main() {
         //создать экземпляр приложения и запустить
         CaesarApp  app = new CaesarApp();
         app.run();
@@ -22,87 +31,96 @@ public class CaesarApp {
     }
 
     public void run(){
-        // реализовать главный цикл приложения
+
         printWelcomeMessage(); //1. Вывести приложение
         //startMusic();
-        int inputInt = 0;
 
         while (true){ //2. Меню (бесконечный цикл)
+
             showMainMenu();
-            scanner = new Scanner(System.in);
-
             System.out.println("Сделайте выбор: ");
-
             String input = scanner.nextLine();
 
-            if (input.equalsIgnoreCase("EXIT")){break;} //4. выход по команде
-
-            if (input.equalsIgnoreCase("HELP")) {
-                showCaesarInfo();
-                continue;
+            switch (input){
+                case "1":
+                    processEncodeFile();
+                    break;
+                case "2":
+                    processDecodeFile();
+                    break;
+                case "3":
+                    showCaesarInfo();
+                    break;
+                case "0":
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Неверный ввод");
             }
-            try {
-                inputInt = Integer.parseInt(input);
+            // if (input.equalsIgnoreCase("EXIT")){break;} 4. выход по команде
 
-            }  catch (NumberFormatException e) {
-                new CaesarException("Не правильный ввод!!!");
-            }
-
-
-            if (inputInt == 1 || inputInt == 2){
-                System.out.println(inputInt == 1 ? "ШИФРОВАНЕ" : "ДЕШИФРОВКА");
-
-                getInputFilePath();
-
-                String source = scanner.nextLine();
-
-                getOutputFilePath();
-
-                String target = scanner.nextLine();
-
-                System.out.println("Укажите сдвиг");
-
-                int step = scanner.nextInt();
+//            if (input.equalsIgnoreCase("HELP")) {
+//                showCaesarInfo();
+//                continue;
+//            }
 
 
 
-                if (inputInt == 1) {
-
-                    processEncodeFile(source, target, step);
-
-                } else {
-
-                    processDecodeFile(source,target, step);
-                }
-
-
-            }else if (inputInt == 3) {
-
-                //getInputFilePath();
-                //getOutputFilePath();
-
-                System.out.println("В разработке");
-            } else if (inputInt == 4) {
-
-                //getInputFilePath();
-                //getOutputFilePath();
-
-                System.out.println("В разработке");
-            } else {
-                System.out.println("От I до IV");
-            }
+//            if (inputInt == 1 || inputInt == 2){
+//                System.out.println(inputInt == 1 ? "ШИФРОВАНЕ" : "ДЕШИФРОВКА");
+//
+//                getInputFilePath();
+//
+//                String source = scanner.nextLine();
+//
+//                getOutputFilePath();
+//
+//                String target = scanner.nextLine();
+//
+//                System.out.println("Укажите сдвиг");
+//
+//                int step = scanner.nextInt();
+//
+//
+//
+//                if (inputInt == 1) {
+//
+//                    processEncodeFile(source, target, step);
+//
+//                } else {
+//
+//                    processDecodeFile(source,target, step);
+//                }
+//
+//
+//            }else if (inputInt == 3) {
+//
+//                //getInputFilePath();
+//                //getOutputFilePath();
+//
+//                System.out.println("В разработке");
+//            } else if (inputInt == 4) {
+//
+//                //getInputFilePath();
+//                //getOutputFilePath();
+//
+//                System.out.println("В разработке");
+//            } else {
+//                System.out.println("От I до IV");
+//            }
         }
 
     }
 
     private void printWelcomeMessage(){
         //приветствие с названием приложения
-        String welcome = "     ___   ____    ____  _______      ______     ___       _______     _______.     ___      .______       __     \n" +
-                "    /   \\  \\   \\  /   / |   ____|    /      |   /   \\     |   ____|   /       |    /   \\     |   _  \\     |  |    \n" +
-                "   /  ^  \\  \\   \\/   /  |  |__      |  ,----'  /  ^  \\    |  |__     |   (----`   /  ^  \\    |  |_)  |    |  |    \n" +
-                "  /  /_\\  \\  \\      /   |   __|     |  |      /  /_\\  \\   |   __|     \\   \\      /  /_\\  \\   |      /     |  |    \n" +
-                " /  _____  \\  \\    /    |  |____    |  `----./  _____  \\  |  |____.----)   |    /  _____  \\  |  |\\  \\----.|__|    \n" +
-                "/__/     \\__\\  \\__/     |_______|    \\______/__/     \\__\\ |_______|_______/    /__/     \\__\\ | _| `._____|(__)    ";
+        String welcome = """
+                     ___   ____    ____  _______      ______     ___       _______     _______.     ___      .______       __    \s
+                    /   \\  \\   \\  /   / |   ____|    /      |   /   \\     |   ____|   /       |    /   \\     |   _  \\     |  |   \s
+                   /  ^  \\  \\   \\/   /  |  |__      |  ,----'  /  ^  \\    |  |__     |   (----`   /  ^  \\    |  |_)  |    |  |   \s
+                  /  /_\\  \\  \\      /   |   __|     |  |      /  /_\\  \\   |   __|     \\   \\      /  /_\\  \\   |      /     |  |   \s
+                 /  _____  \\  \\    /    |  |____    |  `----./  _____  \\  |  |____.----)   |    /  _____  \\  |  |\\  \\----.|__|   \s
+                /__/     \\__\\  \\__/     |_______|    \\______/__/     \\__\\ |_______|_______/    /__/     \\__\\ | _| `._____|(__)   \s""";
 
         System.out.println(welcome);
 
@@ -110,7 +128,7 @@ public class CaesarApp {
 
     private void showMainMenu(){
         //отобразить меню с вариантами действий
-        String stars = "*******************";
+        //String stars = "*******************";
         String firstMessage = "Идущие на смерть приветствуют тебя \nвыберите пункт меню:";
         String positionOne =   "I.  Закодировать послание";
         String positionTwo =   "II. Раскодировать послание";
@@ -127,10 +145,24 @@ public class CaesarApp {
         System.out.println(positionHelp);
         }
 
-    private void processEncodeFile(String source, String destination, int step) {
+    private void processEncodeFile() {
         // обработка кодирования файла
+        System.out.println("Кодирование файла:");
+        try {
+            String inputFile = getInputFilePath();
+            String outputFile = getOutputFilePath();
 
-        if (!fileService.isFilesExists(source)) displayErrorResult();
+            String context = fileService.readFile(inputFile);
+
+            ProcessingResult result = caesarCoder.encodeText(context);
+
+            fileService.writeFile(result.getOutputPreview(), outputFile);
+
+            displaySuccessResult(result, inputFile, outputFile);
+        } catch (CaesarException e) {
+            displayError(e.getMessage());
+        }
+
 
 //        try {
 //            fileService.readFile(source); //2. прочитать исходный файл
@@ -146,13 +178,29 @@ public class CaesarApp {
 //            throw new RuntimeException(e);
 //        }
 
-        displaySuccessResult(); //5. Дать обратную связь
+//        displaySuccessResult(); //5. Дать обратную связь
 
     }
 
-    private void processDecodeFile(String source, String destination, int step){
+    private void processDecodeFile(){
         // обработка декодирования файла
-        if (!fileService.isFilesExists(source)) displayErrorResult();
+
+        System.out.println("\n ДЕКОДИРОВАНИЕ ФАЙЛА");
+
+        try {
+            String inputFile = getInputFilePath();
+            String outputFile = getOutputFilePath();
+
+            String content = fileService.readFile(inputFile);
+            ProcessingResult result = caesarCoder.decodeText(content);
+            fileService.writeFile(result.getOutputPreview(), outputFile);
+
+            displaySuccessResult(result, inputFile, outputFile);
+
+        } catch (CaesarException e) {
+            displayError(e.getMessage());
+        }
+
 
 //        try {
 //            fileService.readFile(source); // 2 прочитать файл
@@ -168,25 +216,34 @@ public class CaesarApp {
 //            throw new RuntimeException(e);
 //        }
 
-        displaySuccessResult(); // 4 показать успешное завершение
+//        displaySuccessResult(); // 4 показать успешное завершение
 
     }
 
-    private void getInputFilePath(){
-        System.out.println("Укажите путь файла для чтения");// запрос пути к исходному файлу
+    private String getInputFilePath() {
+        System.out.print("Введите путь к исходному файлу (с кодом Морзе) и его имя: ");
+        return scanner.nextLine().trim();
     }
 
-    private void getOutputFilePath(){
-        System.out.println("Укажите путь файла для записи"); // запрос пути для записи результата
 
+    private String getOutputFilePath() {
+        System.out.print("Введите путь для результата и имя файла в который запишем результат: ");
+        return scanner.nextLine().trim();
     }
 
-    private void displaySuccessResult() {
+    private void displaySuccessResult(ProcessingResult result, String inputFile, String outputFile) {
         // красивый вывод успешного результата
+        System.out.println("\n " + result.getMessage());
+        System.out.println("Исходный файл: " + inputFile);
+        System.out.println("Результат: " + outputFile);
+
+        System.out.println("\nПревью:");
+        System.out.println("Вход: " + result.getInputPreview());
+        System.out.println("Выход: " + result.getOutputPreview());
     }
 
-    private void displayErrorResult() {
-        System.out.println("Проверьте путь файла и попробуйте еще раз"); // вывод сообщения об ошибке
+    private void displayError(String message) {
+        System.out.println("\n Ошибка: " + message + "\n"); // вывод сообщения об ошибке
     }
 
     private void showCaesarInfo () {
@@ -222,6 +279,7 @@ public class CaesarApp {
                     exc.printStackTrace();
                 } catch (InterruptedException _) {}
             }
+
 }
 
 

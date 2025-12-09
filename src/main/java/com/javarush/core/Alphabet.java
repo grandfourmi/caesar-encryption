@@ -7,16 +7,16 @@ import java.util.*;
 
 public class Alphabet {
 
-    public static final Set<Character> ALPHABETSET; // инициализировать алфавит
+    public static final Set<Character> ALPHABET_SET; // инициализировать алфавит
     //public static final Map<Character,Character> ALPHABET1 ;
-    private static final char[] ALPHABETARRAY;
+    private static final char[] ALPHABET_ARRAY;
 
     static {
-        ALPHABETSET = new  HashSet<>(Arrays.asList('а', 'б',
+        ALPHABET_SET = new  HashSet<>(Arrays.asList('а', 'б',
                 'в','г', 'д', 'е', 'ж', 'з', 'и', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у',
                 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'я', '.', ',', '«', '»',
                 '"', '\'', ':', '!', '?', ' '));
-        ALPHABETARRAY = new char[] {'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з',
+        ALPHABET_ARRAY = new char[] {'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з',
                 'и','к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ',
                 'ъ', 'ы', 'ь', 'э', 'я', '.', ',', '«', '»', '"', '\'', ':', '!', '?', ' '};
 
@@ -25,7 +25,7 @@ public class Alphabet {
         // заполнить цифры
         // создать обратное отображение
 
-;
+
     }
 
     private Alphabet() {
@@ -33,6 +33,6 @@ public class Alphabet {
     }
 
     public static Set<Character> getAlphabet() {
-        return ALPHABETSET;
+        return ALPHABET_SET;
     }
 }
