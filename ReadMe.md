@@ -25,4 +25,7 @@ C:\\exaplesText\\ehrbat_plenniki_dorog.u.txt
         потный Гарри
 C:\\exaplesText\\Rouling_Garri-Potter-perevod-Marii-Spivak-_3_Garri-Potter-i-uznik-Azkabana_RuLit_Me.txt
 
-    
+//Номер русской  А 1040 - Номер русской  я 1103
+//Номер английской  A 65 - Z 90
+//Номер английской  a 97 - z 122
+

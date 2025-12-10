@@ -1,13 +1,15 @@
 package com.javarush;
 import com.javarush.core.CaesarCoder;
 import com.javarush.exception.CaesarException;
-import com.javarush.model.ProcessingResult;
 import com.javarush.service.FileService;
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Scanner;
 
+
+//Введите путь к исходному файлу и его имя: C:\JavaProject\CaesarCodding\caesar-codding\src\text\Gaar.txt
+//Введите путь для результата и имя файла в который запишем результат: C:\JavaProject\CaesarCodding\caesar-codding\src\text\encodedText.txt
 public class CaesarApp {
 
     private final Scanner scanner;
@@ -48,7 +50,10 @@ public class CaesarApp {
                 case "2":
                     processDecodeFile();
                     break;
-                case "3":
+                case "3", "4":
+                    System.out.println("В разработке");
+                    break;
+                case "5":
                     showCaesarInfo();
                     break;
                 case "0":
@@ -57,59 +62,7 @@ public class CaesarApp {
                 default:
                     System.out.println("Неверный ввод");
             }
-            // if (input.equalsIgnoreCase("EXIT")){break;} 4. выход по команде
-
-//            if (input.equalsIgnoreCase("HELP")) {
-//                showCaesarInfo();
-//                continue;
-//            }
-
-
-
-//            if (inputInt == 1 || inputInt == 2){
-//                System.out.println(inputInt == 1 ? "ШИФРОВАНЕ" : "ДЕШИФРОВКА");
-//
-//                getInputFilePath();
-//
-//                String source = scanner.nextLine();
-//
-//                getOutputFilePath();
-//
-//                String target = scanner.nextLine();
-//
-//                System.out.println("Укажите сдвиг");
-//
-//                int step = scanner.nextInt();
-//
-//
-//
-//                if (inputInt == 1) {
-//
-//                    processEncodeFile(source, target, step);
-//
-//                } else {
-//
-//                    processDecodeFile(source,target, step);
-//                }
-//
-//
-//            }else if (inputInt == 3) {
-//
-//                //getInputFilePath();
-//                //getOutputFilePath();
-//
-//                System.out.println("В разработке");
-//            } else if (inputInt == 4) {
-//
-//                //getInputFilePath();
-//                //getOutputFilePath();
-//
-//                System.out.println("В разработке");
-//            } else {
-//                System.out.println("От I до IV");
-//            }
         }
-
     }
 
     private void printWelcomeMessage(){
@@ -127,15 +80,14 @@ public class CaesarApp {
     }
 
     private void showMainMenu(){
-        //отобразить меню с вариантами действий
-        //String stars = "*******************";
         String firstMessage = "Идущие на смерть приветствуют тебя \nвыберите пункт меню:";
-        String positionOne =   "I.  Закодировать послание";
-        String positionTwo =   "II. Раскодировать послание";
-        String positionThree = "III. Взлом послание перебором";
-        String positionFour =  "IV. Взлом статическим анализом";
-        String positionExit =  "Для выхода нажмите EXIT";
-        String positionHelp =  "Для справки введите HELP";
+        String positionOne =   "Закодировать послание нажмите 1";
+        String positionTwo =   "Раскодировать послание нажмите 2";
+        String positionThree = "Взлом послание перебором нажмите 3";
+        String positionFour =  "Взлом статическим анализом нажмите 4";
+        String positionHelp =  "Для справки нажмите 5";
+        String positionExit =  "Для выхода нажмите 0";
+
         System.out.println(firstMessage);
         System.out.println(positionOne);
         System.out.println(positionTwo);
@@ -151,34 +103,17 @@ public class CaesarApp {
         try {
             String inputFile = getInputFilePath();
             String outputFile = getOutputFilePath();
+            int shift = getShiftStep();
 
             String context = fileService.readFile(inputFile);
 
-            ProcessingResult result = caesarCoder.encodeText(context);
+            String result = caesarCoder.encodeText( context, shift );
 
-            fileService.writeFile(result.getOutputPreview(), outputFile);
+            fileService.writeFile(outputFile,result);
 
-            displaySuccessResult(result, inputFile, outputFile);
-        } catch (CaesarException e) {
+        } catch (CaesarException  | NumberFormatException e) {
             displayError(e.getMessage());
         }
-
-
-//        try {
-//            fileService.readFile(source); //2. прочитать исходный файл
-//        } catch (CaesarException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        //3. закодировать текст
-//
-//        try {
-//            fileService.writeFile(destination,""); //4. записать результат
-//        } catch (CaesarException e) {
-//            throw new RuntimeException(e);
-//        }
-
-//        displaySuccessResult(); //5. Дать обратную связь
 
     }
 
@@ -190,38 +125,25 @@ public class CaesarApp {
         try {
             String inputFile = getInputFilePath();
             String outputFile = getOutputFilePath();
+            int shift = getShiftStep();
 
             String content = fileService.readFile(inputFile);
-            ProcessingResult result = caesarCoder.decodeText(content);
-            fileService.writeFile(result.getOutputPreview(), outputFile);
 
-            displaySuccessResult(result, inputFile, outputFile);
+            String result = caesarCoder.decodeText(content, shift);
 
-        } catch (CaesarException e) {
+            fileService.writeFile( outputFile, result);
+
+        //    displaySuccessResult(result, inputFile, outputFile);
+
+        } catch (CaesarException  | NumberFormatException e) {
             displayError(e.getMessage());
         }
 
 
-//        try {
-//            fileService.readFile(source); // 2 прочитать файл
-//        } catch (CaesarException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        // 3 декодировать цезаря
-//
-//        try {
-//            fileService.writeFile(destination,"");
-//        } catch (CaesarException e) {
-//            throw new RuntimeException(e);
-//        }
-
-//        displaySuccessResult(); // 4 показать успешное завершение
-
     }
 
     private String getInputFilePath() {
-        System.out.print("Введите путь к исходному файлу (с кодом Морзе) и его имя: ");
+        System.out.print("Введите путь к исходному файлу и его имя: ");
         return scanner.nextLine().trim();
     }
 
@@ -231,16 +153,11 @@ public class CaesarApp {
         return scanner.nextLine().trim();
     }
 
-    private void displaySuccessResult(ProcessingResult result, String inputFile, String outputFile) {
-        // красивый вывод успешного результата
-        System.out.println("\n " + result.getMessage());
-        System.out.println("Исходный файл: " + inputFile);
-        System.out.println("Результат: " + outputFile);
-
-        System.out.println("\nПревью:");
-        System.out.println("Вход: " + result.getInputPreview());
-        System.out.println("Выход: " + result.getOutputPreview());
-    }
+    private int getShiftStep  () throws NumberFormatException {
+        System.out.println("Укажите ключ для кодировки/раскодировки: ");
+        String input = scanner.nextLine().trim();
+            return Integer.parseInt(input);
+        }
 
     private void displayError(String message) {
         System.out.println("\n Ошибка: " + message + "\n"); // вывод сообщения об ошибке
@@ -281,6 +198,7 @@ public class CaesarApp {
             }
 
 }
+
 
 
 

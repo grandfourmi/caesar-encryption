@@ -1,72 +1,58 @@
 package com.javarush.core;
 
-import com.javarush.model.ProcessingResult;
+
 import com.javarush.exception.CaesarException;
-import com.javarush.service.ValidationService;
 
 
 public class CaesarCoder {
 
-    private final ValidationService validationService;
-
-    public CaesarCoder() {
-        this.validationService = new ValidationService();
-    }
-
-
-    public ProcessingResult encodeText (String text) throws CaesarException {
-        // тут подумать над логикой реализации
-
-        // кодирование текста в цезаря
-        // 1 валидировать входной текст
-        validationService.validateTextForEncoding(text);
-        // 2 провести к верхнему регистру
-        String upperText = text.toUpperCase();
+    public String encodeText (String text, int shift) throws CaesarException {
         StringBuilder result = new StringBuilder();
 
-        // 3 пройти по всем символам
-        for (int i = 0; i < upperText.length(); i++) {
-            char ch = upperText.charAt(i);
-            /* делаем сдвиг по цезарю*/
-            // todo сделать реализацию
-            // 4 найти код Море для каждого символа
-            result.append(Alphabet.getAlphabet());
+        for (char ch : text.toCharArray()) {
+            char temp;
+            int shiftChar = shift + (int) ch;
+
+            if ((int) ch > 1039 && (int) ch < 1104) temp = encodeLetterRuss(shiftChar);
+            else if ((ch > 64 && ch < 91) || (ch > 96 && ch < 123)) temp = encodeLetterEng(shift, ch);
+            else  temp = ch;
+
+            result.append(temp); /* делаем сдвиг по цезарю*/
         }
 
-        String encodedText = result.toString();
-        // 6 вернуть ProcessingResult
-        return  new ProcessingResult(true,"Текст успешно закодирован",
-                getPreview(text),getPreview(encodedText));
+        String resultString = result.toString();
+
+        System.out.println("Текст успешно закодирован:");
+        System.out.println("Исходный файл: " + getPreview(text));
+        System.out.println("Результат: " + getPreview(resultString));
+
+        return resultString;
     }
 
-    public ProcessingResult decodeText (String caesarCode) throws CaesarException {
-
-        // декодирование реализация по морзе
-        // 1 валидировать входной код
-        validationService.validateCaesarCode(caesarCode);
-
-        // 2 разбить на отдельные символы
+    public String decodeText (String caesarCode, int shift) throws CaesarException {
         StringBuilder result = new StringBuilder();
-        String [] symbols = caesarCode.trim().split(" ");
 
-        // 3 найти букву для каждого символа
-        for (String symbol : symbols) {
-            if (Alphabet.getAlphabet().contains(symbol)) {
-                result.append(symbol);
-            } else if (symbol.equals("/")) {
-                result.append("/");
-            }
+        for (char ch : caesarCode.toCharArray()) {
+            char temp;
+            int shiftChar = (int) ch - shift;
+
+            if ((int) ch > 1039 && (int) ch < 1104) temp = deCodeLetterRuss(shiftChar);
+            else if ((ch > 64 && ch < 91) || (ch > 96 && ch < 123)) temp = deCodeLetterEng(shift, ch);
+            else  temp = ch;
+
+            result.append(temp);
         }
 
+        String resultString = result.toString();
 
-        // 4 обработать разделитель слов
-        // 5 собрать результат
-        // 6 вернуть ProcessingResult
-        String decodedText = result.toString();
+        System.out.println("Текст успешно раскодирован:");
+        System.out.println("Исходный файл: " + getPreview(caesarCode));
+        System.out.println("Результат: " + getPreview(resultString));
 
-        return new ProcessingResult(true, "Код успешно декодирован",
-                getPreview(caesarCode), getPreview(decodedText));
+
+        return resultString;
     }
+
 
     public String getPreview (String text) {
 
@@ -74,4 +60,56 @@ public class CaesarCoder {
 
         return text.substring(0, 97) + "...";
     }
+
+    private char encodeLetterRuss(int shift) {
+    char res ;
+    if (shift > 1103) {
+            shift = shift - 1103 + 1040;
+            res = (char) (shift);
+        } else  {
+            res = (char) (shift);
+        }
+    return res;
+
 }
+    private char encodeLetterEng(int shift, char ch) {
+        char res;
+        int shiftChar = shift + (int) Character.toLowerCase(ch);
+        if (shiftChar > 122) {
+            shiftChar = shiftChar - 122 + 97;
+            res = (char) (shiftChar);
+        }  else  {
+            res = (char) (shiftChar);
+        }
+
+        return res;
+    }
+
+    private char deCodeLetterRuss(int shift) {
+        char res ;
+        if (shift < 1041) {
+            shift = shift - 1040 + 1103;
+            res = (char) (shift);
+        } else  {
+            res = (char) (shift);
+        }
+        return res;
+
+    }
+
+
+    private char deCodeLetterEng(int shift, char ch) {
+        char res;
+        int shiftChar = shift - (int) Character.toLowerCase(ch);
+        if (shiftChar < 97) {
+            shiftChar = shiftChar - 97 + 122;
+            res = (char) (shiftChar);
+        }  else  {
+            res = (char) (shiftChar);
+        }
+        return res;
+    }
+    }
+
+
+

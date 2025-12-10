@@ -3,9 +3,17 @@ import com.javarush.exception.CaesarException;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+
+//Рекомендации для работы с большими файлами:
+//
+//Чтение/запись по частям. Для очень больших файлов, которые не помещаются в оперативную память,
+// используйте методы Files.lines() для чтения по строкам или Files.newInputStream() для чтения по блокам.
+//Буферизация. Используй BufferedReader и BufferedWriter для буферизации операций ввода/вывода,
+// что повышает производительность.
 
 public class FileService {
 
@@ -16,18 +24,17 @@ public class FileService {
             Path path = Path.of(filePath);
             // 2 проверить существование
             if (!Files.exists(path)) {
-                throw new CaesarException("File not found" + filePath);
+                throw new CaesarException("Файл не найден " + filePath);
             }
             // 3 проверить права на чтение
             if (!Files.isRegularFile(path)) {
-                throw new CaesarException("File is not a regular file" + filePath);
+                throw new CaesarException("Нет доступа для чтения этого файла " + filePath);
             }
-            // todo 4  проверить содержимое
 
             return Files.readString(path);
 
-            // 5 Обработать IOExxeption
-        } catch (IOException e) {
+            // 5 Обработать IOException
+        } catch (IOException  | InvalidPathException e) {
             throw new CaesarException("Ошибка чтения файла" + e.getMessage(), e);
         }
 
@@ -49,9 +56,9 @@ public class FileService {
             // todo прочитать что значит строчка снизу
             Files.writeString(path, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
-        } catch (IOException e ) {
+        } catch (IOException |InvalidPathException e ) {
             // 4 обработать IOException
-            throw new CaesarException("Ошибка записи файла" + e.getMessage(), e );
+            throw new CaesarException("Ошибка записи файла " + e.getMessage(), e );
         }
     }
 
