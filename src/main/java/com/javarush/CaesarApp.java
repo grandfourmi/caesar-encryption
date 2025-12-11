@@ -8,8 +8,8 @@ import java.nio.file.Path;
 import java.util.Scanner;
 
 
-//Введите путь к исходному файлу и его имя: C:\JavaProject\CaesarCodding\caesar-codding\src\text\Gaar.txt
-//Введите путь для результата и имя файла в который запишем результат: C:\JavaProject\CaesarCodding\caesar-codding\src\text\encodedText.txt
+// C:\JavaProject\CaesarCodding\caesar-codding\src\text\Gaar.txt
+// C:\JavaProject\CaesarCodding\caesar-codding\src\text\encodedText.txt
 public class CaesarApp {
 
     private final Scanner scanner;
@@ -22,11 +22,8 @@ public class CaesarApp {
         this.caesarCoder = new CaesarCoder();
     }
 
-    // конструктор - инициализация зависимостей
-
 
      static void main() {
-        //создать экземпляр приложения и запустить
         CaesarApp  app = new CaesarApp();
         app.run();
 
@@ -34,13 +31,12 @@ public class CaesarApp {
 
     public void run(){
 
-        printWelcomeMessage(); //1. Вывести приложение
+        printWelcomeMessage();
         //startMusic();
 
-        while (true){ //2. Меню (бесконечный цикл)
+        while (true){
 
             showMainMenu();
-            System.out.println("Сделайте выбор: ");
             String input = scanner.nextLine();
 
             switch (input){
@@ -50,13 +46,17 @@ public class CaesarApp {
                 case "2":
                     processDecodeFile();
                     break;
-                case "3", "4":
+                case "3":
                     System.out.println("В разработке");
                     break;
                 case "5":
                     showCaesarInfo();
                     break;
                 case "0":
+                    System.out.println("""
+                            Файлы, необходимые для удаления системы,
+                            были успешно удалены.
+                            Удаление Windows 95 теперь будет невозможно!\s""");
                     System.exit(0);
                     break;
                 default:
@@ -80,26 +80,25 @@ public class CaesarApp {
     }
 
     private void showMainMenu(){
-        String firstMessage = "Идущие на смерть приветствуют тебя \nвыберите пункт меню:";
+
+        String firstMessage = "Выберите пункт меню:";
         String positionOne =   "Закодировать послание нажмите 1";
         String positionTwo =   "Раскодировать послание нажмите 2";
         String positionThree = "Взлом послание перебором нажмите 3";
-        String positionFour =  "Взлом статическим анализом нажмите 4";
         String positionHelp =  "Для справки нажмите 5";
         String positionExit =  "Для выхода нажмите 0";
-
+        System.out.println("*".repeat(positionOne.length()));
         System.out.println(firstMessage);
         System.out.println(positionOne);
         System.out.println(positionTwo);
         System.out.println(positionThree);
-        System.out.println(positionFour);
         System.out.println(positionExit);
         System.out.println(positionHelp);
         }
 
     private void processEncodeFile() {
         // обработка кодирования файла
-        System.out.println("Кодирование файла:");
+        System.out.println("КОДИРОВАНИЕ ФАЙЛА:");
         try {
             String inputFile = getInputFilePath();
             String outputFile = getOutputFilePath();
