@@ -38,7 +38,7 @@ public class CaesarApp {
     public void run() {
 
         printWelcomeMessage();
-        //    startMusic();
+        startMusic();
 
         while (true) {
 
