@@ -1,11 +1,15 @@
 package com.javarush;
+
 import com.javarush.core.CaesarCoder;
+import com.javarush.core.StatisticAnalyzeDecoder;
 import com.javarush.exception.CaesarException;
 import com.javarush.service.FileService;
+
 import javax.sound.sampled.*;
-import java.io.IOException;
-import java.nio.file.Path;
+import java.io.*;
+import java.net.URL;
 import java.util.Scanner;
+import java.io.IOException;
 
 
 // C:\JavaProject\CaesarCodding\caesar-codding\src\text\Gaar.txt
@@ -13,33 +17,35 @@ import java.util.Scanner;
 public class CaesarApp {
 
     private final Scanner scanner;
-    private final FileService fileService ; //  поля класса - зависимости
+    private final FileService fileService; //  поля класса - зависимости
     private final CaesarCoder caesarCoder;
+    private final StatisticAnalyzeDecoder statisticAnalyzeDecoder;
 
     public CaesarApp() {
         this.scanner = new Scanner(System.in);
         this.fileService = new FileService();
         this.caesarCoder = new CaesarCoder();
+        this.statisticAnalyzeDecoder = new StatisticAnalyzeDecoder();
     }
 
 
-     static void main() {
-        CaesarApp  app = new CaesarApp();
+    static void main() {
+        CaesarApp app = new CaesarApp();
         app.run();
 
     }
 
-    public void run(){
+    public void run() {
 
         printWelcomeMessage();
-        //startMusic();
+        //    startMusic();
 
-        while (true){
+        while (true) {
 
             showMainMenu();
             String input = scanner.nextLine();
 
-            switch (input){
+            switch (input) {
                 case "1":
                     processEncodeFile();
                     break;
@@ -48,6 +54,9 @@ public class CaesarApp {
                     break;
                 case "3":
                     processBruteForce();
+                    break;
+                case "4":
+                    processStatisticAnalyzeText();
                     break;
                 case "5":
                     showCaesarInfo();
@@ -61,7 +70,7 @@ public class CaesarApp {
         }
     }
 
-    private void printWelcomeMessage(){
+    private void printWelcomeMessage() {
         //приветствие с названием приложения
         String welcome = """
                      ___   ____    ____  _______      ______     ___       _______     _______.     ___      .______       __    \s
@@ -75,78 +84,116 @@ public class CaesarApp {
 
     }
 
-    private void showMainMenu(){
+    private void showMainMenu() {
 
         String firstMessage = "Выберите пункт меню:";
-        String positionOne =   "Закодировать послание нажмите 1";
-        String positionTwo =   "Раскодировать послание нажмите 2";
+        String positionOne = "Закодировать послание нажмите 1";
+        String positionTwo = "Раскодировать послание нажмите 2";
         String positionThree = "Взлом послание перебором нажмите 3";
-        String positionHelp =  "Для справки нажмите 5";
-        String positionExit =  "Для выхода нажмите 0";
-        System.out.println("*".repeat(positionOne.length()));
+        String positionFour = "Взлом статистическим анализом текста нажмите 4";
+        String positionHelp = "Для справки нажмите 5";
+        String positionExit = "Для выхода нажмите 0";
+        System.out.println("*".repeat(150));
         System.out.println(firstMessage);
         System.out.println(positionOne);
         System.out.println(positionTwo);
         System.out.println(positionThree);
+        System.out.println(positionFour);
         System.out.println(positionExit);
         System.out.println(positionHelp);
-        }
+    }
 
-    private void processEncodeFile() {
-        // обработка кодирования файла
-        System.out.println("КОДИРОВАНИЕ ФАЙЛА:");
+    private void processStatisticAnalyzeText() {
+        System.out.println("ВЗЛОМ СТАТИСТИЧЕСКИМ АНАЛИЗОМ:");
+
         try {
-            String inputFile = getInputFilePath();
+
+            String inputReferenceFile = getInputReferenceFile();
+            String inputEncodeFile = getInputEncodeFile();
+
             String outputFile = getOutputFilePath();
-            int shift = getShiftStep();
+            String contextOne = fileService.readFile(inputReferenceFile);
+            String contextTwo = fileService.readFile(inputEncodeFile);
 
-            String context = fileService.readFile(inputFile);
+            double[] standardFrequency;
+            double[] codeFrequency;
 
-            String result = caesarCoder.encodeText( context, shift );
+            String response =  getLanguageSelection();
 
-            fileService.writeFile(outputFile,result);
+            if (response.equals("R")) {
+                System.out.println("Вы, выбрали русский язык");
+                standardFrequency = statisticAnalyzeDecoder.calculateSymbolRuss(contextOne);
+                codeFrequency = statisticAnalyzeDecoder.calculateSymbolRuss(contextTwo);
+            } else {
+                System.out.println("Вы, выбрали английский язык");
+                standardFrequency = statisticAnalyzeDecoder.calculateSymbolEng(contextOne);
+                codeFrequency = statisticAnalyzeDecoder.calculateSymbolEng(contextTwo);
+            }
+            double[][] allFrequency = statisticAnalyzeDecoder.fillingPossibleOptions(codeFrequency);
+            int step = statisticAnalyzeDecoder.compareArrays(allFrequency, standardFrequency);
 
-        } catch (CaesarException  | NumberFormatException e) {
+            String result = caesarCoder.decodeText(contextTwo, step);
+
+            fileService.writeFile(outputFile, result);
+
+        } catch (CaesarException | NumberFormatException e) {
             displayError(e.getMessage());
         }
 
     }
 
-    private void processDecodeFile(){
-        // обработка декодирования файла
 
+    private void processEncodeFile() {
+        System.out.println("КОДИРОВАНИЕ ФАЙЛА:");
+        try {
+            String inputFile = getInputFilePath();
+            String outputFile = getOutputFilePath();
+            int shift = Math.abs(getShiftStep());
+
+            String context = fileService.readFile(inputFile);
+
+            String result = caesarCoder.encodeText(context, shift);
+
+            fileService.writeFile(outputFile, result);
+
+        } catch (CaesarException | NumberFormatException e) {
+            displayError(e.getMessage());
+        }
+
+    }
+
+    private void processDecodeFile() {
         System.out.println("\n ДЕКОДИРОВАНИЕ ФАЙЛА");
 
         try {
             String inputFile = getInputFilePath();
             String outputFile = getOutputFilePath();
-            int shift = getShiftStep();
+            int step = Math.abs(getShiftStep());
 
             String content = fileService.readFile(inputFile);
 
-            String result = caesarCoder.decodeText(content, shift);
+            String result = caesarCoder.decodeText(content, step);
 
-            fileService.writeFile( outputFile, result);
+            fileService.writeFile(outputFile, result);
 
-        //    displaySuccessResult(result, inputFile, outputFile);
 
-        } catch (CaesarException  | NumberFormatException e) {
+        } catch (CaesarException | NumberFormatException e) {
             displayError(e.getMessage());
         }
 
 
     }
 
-    private void processExitSystem () {
+    private void processExitSystem() {
         scanner.close();
         System.out.println("""
-                            Файлы, необходимые для удаления системы,
-                            были успешно удалены.
-                            Удаление Windows 95 теперь будет невозможно!\s""");
+                Файлы, необходимые для удаления системы,
+                были успешно удалены.
+                Удаление Windows 95 теперь будет невозможно!\s""");
         System.exit(0);
     }
 
-    private void processBruteForce () {
+    private void processBruteForce() {
         System.out.println("ВЗЛОМ МЕТОДОМ ПЕРЕБОРА \"Brute Force\"");
 
         try {
@@ -159,23 +206,23 @@ public class CaesarApp {
             String result;
             do {
 
-                result = caesarCoder.bruteForce(context,key);
+                result = caesarCoder.bruteForce(context, key);
                 userResponse = getUserResponse(key);
 
                 if (userResponse.equalsIgnoreCase("N")) {
                     key++;
                 }
 
-                if (key  > 32) {
+                if (key > 32) {
                     System.out.println("Пройдены все итерации");
                     break;
                 }
 
             } while (!userResponse.equalsIgnoreCase("Y"));
 
-                if (userResponse.equalsIgnoreCase("Y")) {
-                    fileService.writeFile(outputFile,result);
-                }
+            if (userResponse.equalsIgnoreCase("Y")) {
+                fileService.writeFile(outputFile, result);
+            }
 
 
         } catch (CaesarException e) {
@@ -183,18 +230,35 @@ public class CaesarApp {
         }
 
     }
+    private String getLanguageSelection () {
+        System.out.println("Выберите язык закодированного текста.\nАнглийский, нажмите \"E\"\nРусский, нажмите \"R\"");
+        String languageSelection = scanner.nextLine();
+        return languageSelection.trim().equalsIgnoreCase("E") ? languageSelection.trim() :
+                languageSelection.trim().equalsIgnoreCase("R") ? languageSelection.trim() : getLanguageSelection();
+    }
 
     private String getUserResponse(int key) {
-        System.out.println("Взлом перебором попытка номер " + key +"\n" +
+        System.out.println("Взлом перебором попытка номер " + key + "\n" +
                 "Стал ли текст читаем?");
-        System.out.println( "Нажмите \"Y\" для подтверждения и записи\nИли \"N\" для следующей итерации");
+
+        System.out.println("Нажмите \"Y\" для подтверждения и записи\nИли \"N\" для следующей итерации");
         String userResponse = scanner.nextLine();
-        return userResponse.equalsIgnoreCase("Y")? userResponse:
-                userResponse.equalsIgnoreCase("N")? userResponse: getUserResponse(key);
+        return userResponse.trim().equalsIgnoreCase("Y") ? userResponse.trim() :
+                userResponse.trim().equalsIgnoreCase("N") ? userResponse.trim() : getUserResponse(key);
     }
 
     private String getInputFilePath() {
         System.out.print("Введите путь к исходному файлу и его имя: ");
+        return scanner.nextLine().trim();
+    }
+
+    private String getInputReferenceFile() {
+        System.out.println("Введите путь файлу содержащий к похожий текст:");
+        return scanner.nextLine().trim();
+    }
+
+    private String getInputEncodeFile() {
+        System.out.println("Введите путь файлу содержащий к закодированный текст:");
         return scanner.nextLine().trim();
     }
 
@@ -204,51 +268,52 @@ public class CaesarApp {
         return scanner.nextLine().trim();
     }
 
-    private int getShiftStep  () throws NumberFormatException {
+    private int getShiftStep() throws NumberFormatException {
         System.out.println("Укажите ключ для кодировки/раскодировки: ");
         String input = scanner.nextLine().trim();
-            return Integer.parseInt(input);
-        }
+        return Integer.parseInt(input);
+    }
 
     private void displayError(String message) {
         System.out.println("\n Ошибка: " + message + "\n"); // вывод сообщения об ошибке
     }
 
-    private void showCaesarInfo () {
-        System.out.println("Какая то справка");
+    private void showCaesarInfo() {
+        String readMe = "readMe.md";
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(readMe))) {
+            fileService.readFile(readMe);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line + "\n");
+            }
+        } catch (IOException | CaesarException e) {
+            displayError(e.getMessage());
+        }
     }
 
-    private void startMusic () {
-        // Полностью украденный код в функционале не разбирался
 
+    private void startMusic() {
         try {
-                    Path sound = Path.of("C:\\JavaProject\\CaesarCodding\\caesar-codding\\src\\sound\\tanksOfDendy.wav");
-                    //Получаем AudioInputStream
-                    //Вот тут могут полететь IOException и UnsupportedAudioFileException
-                    AudioInputStream ais = AudioSystem.getAudioInputStream(sound.toFile());
+            URL url = getClass().getResource("/sound/tanksOfDendy.wav");
+            try (AudioInputStream ais = AudioSystem.getAudioInputStream(url)) {
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.start();
+                Thread.sleep(clip.getMicrosecondLength() / 1000);
 
-                    //Получаем реализацию интерфейса Clip
-                    // может выкинуть LineUnavailableException
-                    Clip clip = AudioSystem.getClip();
-
-                    //Загружаем наш звуковой поток в Clip
-                    // может выкинуть IOException и LineUnavailableException
-                    clip.open(ais);
-
-                    clip.setFramePosition(0); //устанавливаем указатель на старт
-                    clip.start(); //Поехали!!!
-
-                    //Если не запущено других потоков, то стоит подождать, пока клип не закончится
-                    //В GUI-приложениях следующие 3 строчки не понадобятся
-                   Thread.sleep(clip.getMicrosecondLength()/1000);
-                    // clip.stop(); //Останавливаем
-                    clip.close(); //Закрываем
-                } catch (IOException | UnsupportedAudioFileException | LineUnavailableException exc ) {
-                    exc.printStackTrace();
-                } catch (InterruptedException _) {}
+                clip.close();
             }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }
+
+
+
 
 
 
