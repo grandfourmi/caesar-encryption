@@ -47,17 +47,13 @@ public class CaesarApp {
                     processDecodeFile();
                     break;
                 case "3":
-                    System.out.println("В разработке");
+                    processBruteForce();
                     break;
                 case "5":
                     showCaesarInfo();
                     break;
                 case "0":
-                    System.out.println("""
-                            Файлы, необходимые для удаления системы,
-                            были успешно удалены.
-                            Удаление Windows 95 теперь будет невозможно!\s""");
-                    System.exit(0);
+                    processExitSystem();
                     break;
                 default:
                     System.out.println("Неверный ввод");
@@ -139,6 +135,62 @@ public class CaesarApp {
         }
 
 
+    }
+
+    private void processExitSystem () {
+        scanner.close();
+        System.out.println("""
+                            Файлы, необходимые для удаления системы,
+                            были успешно удалены.
+                            Удаление Windows 95 теперь будет невозможно!\s""");
+        System.exit(0);
+    }
+
+    private void processBruteForce () {
+        System.out.println("ВЗЛОМ МЕТОДОМ ПЕРЕБОРА \"Brute Force\"");
+
+        try {
+            String inputFile = getInputFilePath();
+            String outputFile = getOutputFilePath();
+
+            String context = fileService.readFile(inputFile);
+            int key = 1;
+            String userResponse;
+            String result;
+            do {
+
+                result = caesarCoder.bruteForce(context,key);
+                userResponse = getUserResponse(key);
+
+                if (userResponse.equalsIgnoreCase("N")) {
+                    key++;
+                }
+
+                if (key  > 32) {
+                    System.out.println("Пройдены все итерации");
+                    break;
+                }
+
+            } while (!userResponse.equalsIgnoreCase("Y"));
+
+                if (userResponse.equalsIgnoreCase("Y")) {
+                    fileService.writeFile(outputFile,result);
+                }
+
+
+        } catch (CaesarException e) {
+            displayError(e.getMessage());
+        }
+
+    }
+
+    private String getUserResponse(int key) {
+        System.out.println("Взлом перебором попытка номер " + key +"\n" +
+                "Стал ли текст читаем?");
+        System.out.println( "Нажмите \"Y\" для подтверждения и записи\nИли \"N\" для следующей итерации");
+        String userResponse = scanner.nextLine();
+        return userResponse.equalsIgnoreCase("Y")? userResponse:
+                userResponse.equalsIgnoreCase("N")? userResponse: getUserResponse(key);
     }
 
     private String getInputFilePath() {

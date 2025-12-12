@@ -17,7 +17,7 @@ public class CaesarCoder {
 
             if (ch >= 'а' && ch <= 'я') {
                 temp = encodeLetterRuss(step,ch);
-            } else if (ch > 'a' && ch < 'z') {
+            } else if (ch >= 'a' && ch <= 'z') {
                 temp = encodeLetterEng(step, ch);
             } else {
                 temp = ch;
@@ -34,7 +34,7 @@ public class CaesarCoder {
         return resultString;
     }
 
-    public String decodeText (String caesarCode, int shift) throws CaesarException {
+    public String decodeText (String caesarCode, int step) throws CaesarException {
         StringBuilder result = new StringBuilder();
 
         for (char ch : caesarCode.toCharArray()) {
@@ -44,9 +44,9 @@ public class CaesarCoder {
             char temp;
 
             if (ch >= 'а' && ch <= 'я') {
-                temp = deCodeLetterRuss(shift , ch);
+                temp = deCodeLetterRuss(step, ch);
             } else if (((int)ch > 96 && (int)ch < 123)) {
-             temp = deCodeLetterEng(shift, ch);
+             temp = deCodeLetterEng(step, ch);
             } else {
                 temp = ch;
             }
@@ -64,13 +64,38 @@ public class CaesarCoder {
         return resultString;
     }
 
+    public String bruteForce(String text, int key) throws CaesarException {
+
+        StringBuilder result = new StringBuilder();
+
+        for(char ch : text.toCharArray()){
+            char temp;
+                ch = Character.toLowerCase(ch);
+                if (ch >= 'а' && ch <= 'я') {
+                    temp = encodeLetterRuss(key,ch);
+                } else if (ch >= 'a' && ch <= 'z') {
+                    temp = encodeLetterEng(key, ch);
+                } else {
+                temp = ch;
+            }
+
+            result.append(temp);
+        }
+        String resultString = result.toString();
+
+        System.out.println("Результат: " + getPreview(resultString));
+        System.out.println("*".repeat(100));
+        return resultString;
+    }
 
     public String getPreview (String text) {
 
-        if (text.length() <= 100) return text;
+        if (text.length() <= 300) return text;
 
-        return text.substring(0, 97) + "...";
+        return text.substring(0, 300) + "...";
     }
+
+
 
     private char encodeLetterRuss(int step, char ch) {
         step = step % 32;
